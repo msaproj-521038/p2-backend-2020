@@ -2,12 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>REST-API</RootNamespace>
+    <RootNamespace>REST_API</RootNamespace>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
 
 
 </Project>
