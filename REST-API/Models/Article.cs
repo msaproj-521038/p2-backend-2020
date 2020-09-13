@@ -31,6 +31,6 @@ namespace REST_API.Models
         public string Introduction { get; set; }
 
         // An article has a 1-to-many relationship with ArticleFields.
-        public ICollection<ArticleFields> Fields { get; set; }
+        public ICollection<ArticleField> Fields { get; set; }
     }
 }

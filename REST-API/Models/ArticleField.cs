@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace REST_API.Models
 {
-    public class ArticleFields
+    public class ArticleField
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

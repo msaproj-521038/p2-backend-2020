@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>REST_API</RootNamespace>
+    <RootNamespace>REST-API</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

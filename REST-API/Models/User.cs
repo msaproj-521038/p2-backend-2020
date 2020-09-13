@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace REST_API.Models
 {
-    public class Users
+    public class User
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
