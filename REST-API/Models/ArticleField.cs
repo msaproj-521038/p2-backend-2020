@@ -14,6 +14,7 @@ namespace REST_API.Models
         [Column("ID")]
         public int FieldsID { get; set; }
 
+        // Article has a 1 to many relationship with ArticleField.
         [Required]
         [Column("articleID")]
         public int ArticleID { get; set; }

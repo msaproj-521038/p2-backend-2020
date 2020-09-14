@@ -18,7 +18,7 @@ namespace REST_API.Data
         public ArticleContext(DbContextOptions<ArticleContext> options) : base(options) { }
 
         // Use DbSet<Article> to query or read and 
-        // write information about A Article
+        // write information about an Article
         public DbSet<Article> Article { get; set; }
         public DbSet<User> User { get; set; }
         public DbSet<ArticleField> ArticleField { get; set; }

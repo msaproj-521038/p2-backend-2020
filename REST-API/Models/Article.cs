@@ -29,8 +29,5 @@ namespace REST_API.Models
         [Required]
         [Column("intro")]
         public string Introduction { get; set; }
-
-        // An article has a 1-to-many relationship with ArticleFields.
-        public ICollection<ArticleField> Fields { get; set; }
     }
 }
