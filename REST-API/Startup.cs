@@ -30,6 +30,8 @@ namespace REST_API
         {
             services.AddControllers();
 
+            services.AddCors();
+
             // Use sqlite database as it is cheaper, consider switching to MySQL or PostgreSQL for commercial production.
             services.AddDbContext<ArticleContext>(options =>
                     options.UseSqlite(Configuration.GetConnectionString("ArticleContext")));
@@ -53,6 +55,13 @@ namespace REST_API
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseCors(builder => builder
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .SetIsOriginAllowed((host) => true)
+                .AllowCredentials()
+            );
 
             app.UseEndpoints(endpoints =>
             {

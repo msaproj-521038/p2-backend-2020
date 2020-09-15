@@ -20,7 +20,7 @@ namespace REST_API_TEST
         {
             using (var context = new ArticleContext(options))
             {
-                var NewUser = new User
+                BasicAuthenticateDTO NewUser = new BasicAuthenticateDTO
                 {
                     UserName = "Hinata",
                     PassWord = "Hyuga"
@@ -66,7 +66,7 @@ namespace REST_API_TEST
                 response = await controller.ResetPassword("Naruto", Password);
                 Assert.IsInstanceOf<NoContentResult>(response);
 
-                User user = new User
+                BasicAuthenticateDTO user = new BasicAuthenticateDTO
                 {
                     UserName = "Naruto",
                     PassWord = "Haruno"
@@ -95,7 +95,7 @@ namespace REST_API_TEST
                 Assert.IsInstanceOf<OkObjectResult>(response);
 
                 // Check user does not exist in database.
-                User user = new User
+                BasicAuthenticateDTO user = new BasicAuthenticateDTO
                 {
                     UserName = "JSON",
                     PassWord = "Jason"

@@ -39,7 +39,7 @@ namespace REST_API.Controllers
 
         // GET: api/Users/Verify
         [HttpGet("Verify")]
-        public async Task<IActionResult> Login(User user)
+        public async Task<IActionResult> Login(BasicAuthenticateDTO user)
         {
             var checkUser = await _context.User.Where(p => p.UserName == user.UserName).FirstOrDefaultAsync();
 
@@ -106,17 +106,24 @@ namespace REST_API.Controllers
         // POST: api/Users
         // Create accounts, no 2 users can have the same usernames.
         [HttpPost]
-        public async Task<ActionResult<User>> CreateAccount(User user)
+        public async Task<ActionResult<string>> CreateAccount(BasicAuthenticateDTO user)
         {
             // Enforce unique usernames.
             if (UserExists(user.UserName))
             {
                 return BadRequest("Username " + user.UserName + " is already used by someone else, please choose another.");
             }
-            _context.User.Add(user);
+
+            User NewUser = new User
+            {
+                UserName = user.UserName,
+                PassWord = user.PassWord
+            };
+
+            _context.User.Add(NewUser);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.UserID }, user);
+            return CreatedAtAction("GetUser", new { id = NewUser.UserID }, NewUser.UserName);
         }
 
         // DELETE: api/Users/Naruto
