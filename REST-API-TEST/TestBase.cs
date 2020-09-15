@@ -48,14 +48,14 @@ namespace REST_API_TEST
                 context.ArticleField.AddRange(
                     new ArticleField
                     {
-                        FieldsID = 1,
+                        FieldID = 1,
                         ArticleID = 1,
                         Name = "Why do we Procastinate?",
                         Value = "We may spend this procastination time doing something else which is of interest or maybe more productive. Like for example, at the time of writing this article, I spend like 80% of the time I should do this playing Minecraft instead."
                     },
                     new ArticleField
                     {
-                        FieldsID = 2,
+                        FieldID = 2,
                         ArticleID = 1,
                         Name = "Is Procastination good?",
                         Value = "It depends, if we waste too much time procastinating, it can be bad, but it is almost always unavoidable especially when due dates are days away. This is where last minute work happens to some people."

@@ -21,7 +21,7 @@ namespace REST_API.Controllers
         // Convert fields to exclude ArticleID from the result content.
         public static readonly Expression<Func<ArticleField, FieldDTO>> AsArticleFieldDTO = x => new FieldDTO
         {
-            ID = x.FieldsID,
+            ID = x.FieldID,
             Name = x.Name,
             Value = x.Value
         };
@@ -185,6 +185,7 @@ namespace REST_API.Controllers
         {
             var author = await _context.User.Where(p => p.UserName == article.UserName).FirstAsync();
 
+            // Ensure author exists.
             if(author == null)
             {
                 return StatusCode(403);

@@ -26,7 +26,7 @@ namespace REST_API.Controllers
         // Convert fields to exclude ArticleID from the result content.
         private static readonly Expression<Func<ArticleField, FieldDTO>> AsArticleFieldDTO = x => new FieldDTO
         {
-            ID = x.FieldsID,
+            ID = x.FieldID,
             Name = x.Name,
             Value = x.Value
         };
@@ -51,7 +51,7 @@ namespace REST_API.Controllers
 
             return Ok(new FieldDTO
             {
-                ID = articleField.FieldsID,
+                ID = articleField.FieldID,
                 Name = articleField.Name,
                 Value = articleField.Value
             });
@@ -63,7 +63,7 @@ namespace REST_API.Controllers
         [HttpPut]
         public async Task<IActionResult> PutArticleField(ArticleFieldEditTemplateDTO ArticleField)
         {
-            var TargetField = await _context.ArticleField.FindAsync(ArticleField.FieldsID);
+            var TargetField = await _context.ArticleField.FindAsync(ArticleField.FieldID);
 
             if(TargetField == null)
             {
@@ -90,7 +90,7 @@ namespace REST_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ArticleFieldExists(ArticleField.FieldsID))
+                if (!ArticleFieldExists(ArticleField.FieldID))
                 {
                     return NotFound();
                 }
@@ -134,7 +134,7 @@ namespace REST_API.Controllers
             _context.ArticleField.Add(NewField);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetArticleField", new { id = NewField.FieldsID }, NewField);
+            return CreatedAtAction("GetArticleField", new { id = NewField.FieldID }, NewField);
         }
 
         // DELETE: api/ArticleFields/5
@@ -155,7 +155,7 @@ namespace REST_API.Controllers
 
         private bool ArticleFieldExists(int id)
         {
-            return _context.ArticleField.Any(e => e.FieldsID == id);
+            return _context.ArticleField.Any(e => e.FieldID == id);
         }
     }
 }

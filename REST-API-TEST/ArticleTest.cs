@@ -69,12 +69,12 @@ namespace REST_API_TEST
                     Introduction = "C# is a programming language but is it really that good?"
                 };
                 var response = await controller.PostArticle(NewArticle);
-                Assert.IsNull((response.Result as CreatedAtActionResult));
+                Assert.IsNull(response.Result as CreatedAtActionResult);
 
                 // Now with correct authentication.
                 NewArticle.PassWord = "Uzumaki";
                 response = await controller.PostArticle(NewArticle);
-                Assert.IsNotNull((response.Result as CreatedAtActionResult));
+                Assert.IsNotNull(response.Result as CreatedAtActionResult);
             }
         }
     }
