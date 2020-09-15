@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using REST_API.Data;
+using REST_API.DTO;
 using REST_API.Models;
 
 namespace REST_API.Controllers
@@ -21,12 +23,20 @@ namespace REST_API.Controllers
             _context = context;
         }
 
-        // GET: api/ArticleFields
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<ArticleField>>> GetArticleField()
+        // Convert fields to exclude ArticleID from the result content.
+        private static readonly Expression<Func<ArticleField, FieldDTO>> AsArticleFieldDTO = x => new FieldDTO
         {
-            return await _context.ArticleField.ToListAsync();
-        }
+            ID = x.FieldsID,
+            Name = x.Name,
+            Value = x.Value
+        };
+
+        // GET: api/ArticleFields
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<ArticleField>>> GetArticleField()
+        //{
+        //    return await _context.ArticleField.ToListAsync();
+        //}
 
         // GET: api/ArticleFields/5
         [HttpGet("{id}")]

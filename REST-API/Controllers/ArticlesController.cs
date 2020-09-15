@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -17,21 +18,54 @@ namespace REST_API.Controllers
     {
         private readonly ArticleContext _context;
 
+        // Convert fields to exclude ArticleID from the result content.
+        public static readonly Expression<Func<ArticleField, FieldDTO>> AsArticleFieldDTO = x => new FieldDTO
+        {
+            ID = x.FieldsID,
+            Name = x.Name,
+            Value = x.Value
+        };
+
         public ArticlesController(ArticleContext context)
         {
             _context = context;
         }
 
-        // GET: api/Articles
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticle()
+        //// GET: api/Articles
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Article>>> GetArticle()
+        //{
+        //    return await _context.Article.ToListAsync();
+        //}
+
+        // GET: api/Articles/Summary
+        [HttpGet("Summary")]
+        public async Task<ActionResult<IEnumerable<ArticleContentSimpleDTO>>> GetArticleSummary()
         {
-            return await _context.Article.ToListAsync();
+            var results = await _context.Article.ToListAsync();
+            List<ArticleContentSimpleDTO> ArticleSummaries = new List<ArticleContentSimpleDTO>();
+
+            // Change to Author Names from Author ID.
+            results.ForEach(x =>
+            {
+                ArticleSummaries.Add(new ArticleContentSimpleDTO
+                {
+                    ArticleID = x.ArticleID,
+                    Author = _context.User.Where(u => u.UserID.Equals(x.UserID)).FirstOrDefault().UserName,
+                    CreatedDate = x.CreatedDate,
+                    Title = x.Title,
+                    Introduction = x.Introduction
+                });
+            });
+
+            return Ok(ArticleSummaries);
         }
 
-        // GET: api/Articles/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Article>> GetArticle(int id)
+        // GET: api/Articles/Full/5
+        // Since we are just sending 1 full details of this article along with the fields associated with this article.
+        // Gives enough information to embed an article on a webpage.
+        [HttpGet("Full/{id}")]
+        public async Task<ActionResult<ArticleContentFullDTO>> GetArticle(int id)
         {
             var article = await _context.Article.FindAsync(id);
 
@@ -40,42 +74,71 @@ namespace REST_API.Controllers
                 return NotFound();
             }
 
-            return article;
+            var author = await _context.User.FindAsync(article.UserID);
+            var fields = await _context.ArticleField.Where(p => p.ArticleID == id).Select(AsArticleFieldDTO).ToListAsync();
+
+            ArticleContentFullDTO DTO = new ArticleContentFullDTO()
+            {
+                ArticleID = article.ArticleID,
+                Author = author.UserName,
+                CreatedDate = article.CreatedDate,
+                Title = article.Title,
+                Introduction = article.Introduction,
+                Fields = new List<FieldDTO>(fields)
+            };
+
+            return Ok(DTO);
         }
 
-        [HttpGet("Author/{author}")]
-        // Search articles based on author name.
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticleByAuthor(string Author)
-        {
-            var author = await _context.User.Where(p => p.UserName.Contains(Author)).FirstAsync();
+        //[HttpGet("Summary/Author/{author}")]
+        //// Search articles based on author name.
+        //public async Task<ActionResult<IEnumerable<Article>>> GetArticleByAuthor(string Author)
+        //{
+        //    var author = await _context.User.Where(p => p.UserName.Contains(Author)).FirstAsync();
 
-            if(author == null)
-            {
-                return BadRequest("Author with that username does not exist!");
-            }
+        //    if(author == null)
+        //    {
+        //        return BadRequest("Author with that username does not exist!");
+        //    }
 
-            var article = await _context.Article.Where(p => p.UserID == author.UserID).ToListAsync();
+        //    var article = await _context.Article.Where(p => p.UserID == author.UserID).ToListAsync();
 
-            if (article == null)
-            {
-                return NotFound("Author has not made any articles.");
-            }
+        //    if (article == null)
+        //    {
+        //        return NotFound("Author has not made any articles.");
+        //    }
 
-            return article;
-        }
+        //    return article;
+        //}
 
-        [HttpGet("Query/{query}")]
+        [HttpGet("Summary/Query/{query}")]
         // Search articles based on search result.
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticleByQuery(string query)
+        public async Task<ActionResult<IEnumerable<ArticleContentSimpleDTO>>> GetArticleByQuery(string query)
         {
-            var article = await _context.Article.Where(p => p.Title.Contains(query)).ToListAsync();
+            // Ensure to check title without worrying about case sensitivity.
+            var results = await _context.Article.Where(p => p.Title.ToLower().Contains(query.ToLower())).ToListAsync();
 
-            if (article == null)
+            if (results == null)
             {
                 return NotFound();
             }
 
-            return article;
+            List<ArticleContentSimpleDTO> ArticleSummaries = new List<ArticleContentSimpleDTO>();
+
+            // Change to Author Names from Author ID.
+            results.ForEach(x =>
+            {
+                ArticleSummaries.Add(new ArticleContentSimpleDTO
+                {
+                    ArticleID = x.ArticleID,
+                    Author = _context.User.Where(u => u.UserID.Equals(x.UserID)).FirstOrDefault().UserName,
+                    CreatedDate = x.CreatedDate,
+                    Title = x.Title,
+                    Introduction = x.Introduction
+                });
+            });
+
+            return Ok(ArticleSummaries);
         }
 
         // PUT: api/Articles/5
@@ -96,12 +159,12 @@ namespace REST_API.Controllers
             {
                 if(article.PassWord != Author.PassWord)
                 {
-                    return Forbid("Invalid author password!");
+                    return StatusCode(403);
                 }
             }
             else
             {
-                return Forbid("Invalid author username!");
+                return StatusCode(403);
             }
 
             TargetArticle.Title = article.Title;
@@ -130,17 +193,17 @@ namespace REST_API.Controllers
 
             if(author == null)
             {
-                return Forbid("User is not registered.");
+                return StatusCode(403);
             }
 
             if (author.UserName != article.UserName)
             {
-                return Unauthorized("You are not the author, so article not modified!");
+                return StatusCode(401);
             }
 
             if (author.PassWord != article.PassWord)
             {
-                return Forbid("Incorrect password!");
+                return StatusCode(403);
             }
 
             Article TargetArticle = new Article
@@ -172,12 +235,12 @@ namespace REST_API.Controllers
 
             if (author.UserName != authentication.UserName)
             {
-                return Unauthorized("You are not the author, so article not deleted!");
+                return StatusCode(401);
             }
 
             if(author.PassWord != authentication.PassWord)
             {
-                return Forbid("Incorrect password!");
+                return StatusCode(403);
             }
 
             _context.Article.Remove(article);

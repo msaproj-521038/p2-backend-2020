@@ -50,6 +50,8 @@ namespace REST_API.Models
                     Title = "Procastination",
                     Introduction = "Why do we spend time doing other things unrelated to the matter?"
                 };
+                context.Article.Add(article1);
+                context.SaveChanges();
 
                 /*
                  * DECLARE FIELDS FOR ARTICLE1
@@ -68,7 +70,6 @@ namespace REST_API.Models
                     Value = "It depends, if we waste too much time procastinating, it can be bad, but it is almost always unavoidable especially when due dates are days away. This is where last minute work happens to some people."
                 };
 
-                context.Article.Add(article1);
                 context.ArticleField.Add(field1);
                 context.ArticleField.Add(field2);
 

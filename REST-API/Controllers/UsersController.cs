@@ -56,21 +56,18 @@ namespace REST_API.Controllers
         [HttpPut("{UserName}")]
         public async Task<IActionResult> PutUser(string UserName, PasswordResetDTO PasswordReset)
         {
-            var user = await _context.User.Where(p => p.UserName == UserName).FirstAsync();
+            var user = await _context.User.Where(p => p.UserName == UserName).FirstOrDefaultAsync();
             if (user == null)
             {
                 return NotFound("User " + UserName + " does not exist!");
             }
 
-            if(user.PassWord == PasswordReset.OldPassWord)
+            if(user.PassWord != PasswordReset.OldPassWord)
             {
-                user.PassWord = PasswordReset.NewPassWord;
-            }
-            else
-            {
-                return BadRequest("Old password does not match current stored password!");
+                return BadRequest("Passwords do not match!");
             }
 
+            user.PassWord = PasswordReset.NewPassWord;
             _context.Entry(user).State = EntityState.Modified;
 
             try
@@ -106,7 +103,7 @@ namespace REST_API.Controllers
         [HttpDelete("{UserName}")]
         public async Task<ActionResult<User>> DeleteUser(string UserName, string PassWord)
         {
-            var user = await _context.User.Where(p => p.UserName == UserName).FirstAsync();
+            var user = await _context.User.Where(p => p.UserName == UserName).FirstOrDefaultAsync();
             if (user == null)
             {
                 return NotFound("User not found!");
@@ -120,7 +117,7 @@ namespace REST_API.Controllers
             _context.User.Remove(user);
             await _context.SaveChangesAsync();
 
-            return user;
+            return Ok("User " + user.UserName + " has been deleted.");
         }
 
         private bool UserExists(string UserName)
