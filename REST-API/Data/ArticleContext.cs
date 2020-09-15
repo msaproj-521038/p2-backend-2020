@@ -38,16 +38,5 @@ namespace REST_API.Data
                 .WithMany()
                 .HasForeignKey(p => p.ArticleID);
         }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-           .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-           .AddJsonFile("appsettings.json")
-           .Build();
-
-            // Use sqlite database as it is cheaper, consider switching to MySQL or PostgreSQL for commercial production.
-            optionsBuilder.UseSqlite(configuration.GetConnectionString("ArticleContext"));
-        }
     }
 }

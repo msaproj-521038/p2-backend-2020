@@ -30,6 +30,7 @@ namespace REST_API
         {
             services.AddControllers();
 
+            // Use sqlite database as it is cheaper, consider switching to MySQL or PostgreSQL for commercial production.
             services.AddDbContext<ArticleContext>(options =>
                     options.UseSqlite(Configuration.GetConnectionString("ArticleContext")));
 
