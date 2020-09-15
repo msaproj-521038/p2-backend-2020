@@ -8,12 +8,10 @@ using System.Text;
 
 namespace REST_API_TEST
 {
-    public class UnitTest
+    public class TestBase
     {
-        public static DbContextOptions<ArticleContext> options
-        = new DbContextOptionsBuilder<ArticleContext>()
-        .UseInMemoryDatabase(databaseName: "testDatabase")
-        .Options;
+        public static DbContextOptions<ArticleContext> options = new DbContextOptionsBuilder<ArticleContext>()
+            .UseInMemoryDatabase(databaseName: "testDatabase").Options;
 
         // Populate an in-memory database with data to work with.
         [SetUp]
@@ -24,21 +22,24 @@ namespace REST_API_TEST
                 context.User.AddRange(
                     new User
                     {
+                        UserID = 1,
                         UserName = "JSON",
                         PassWord = "Jason"
                     },
                     new User
                     {
+                        UserID = 2,
                         UserName = "Naruto",
                         PassWord = "Uzumaki"
                     }
                 );
 
-                context.Article.Add(
+                context.Article.AddRange(
                     new Article()
                     {
+                        ArticleID = 1,
                         UserID = 1, // Make JSON the author.
-                    CreatedDate = DateTime.UtcNow,
+                        CreatedDate = DateTime.UtcNow,
                         Title = "Procastination",
                         Introduction = "Why do we spend time doing other things unrelated to the matter?"
                     }
@@ -47,12 +48,14 @@ namespace REST_API_TEST
                 context.ArticleField.AddRange(
                     new ArticleField
                     {
+                        FieldsID = 1,
                         ArticleID = 1,
                         Name = "Why do we Procastinate?",
                         Value = "We may spend this procastination time doing something else which is of interest or maybe more productive. Like for example, at the time of writing this article, I spend like 80% of the time I should do this playing Minecraft instead."
                     },
                     new ArticleField
                     {
+                        FieldsID = 2,
                         ArticleID = 1,
                         Name = "Is Procastination good?",
                         Value = "It depends, if we waste too much time procastinating, it can be bad, but it is almost always unavoidable especially when due dates are days away. This is where last minute work happens to some people."
@@ -87,17 +90,5 @@ namespace REST_API_TEST
                 context.SaveChanges();
             };
         }
-
-        [Test]
-        public void CreateUser()
-        {
-            using (var context = new ArticleContext(options))
-            {
-                Assert.IsTrue(true);
-            }
-        }
-
-
-        
     }
 }

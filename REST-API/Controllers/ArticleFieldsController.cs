@@ -40,7 +40,7 @@ namespace REST_API.Controllers
 
         // GET: api/ArticleFields/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ArticleField>> GetArticleField(int id)
+        public async Task<ActionResult<FieldDTO>> GetArticleField(int id)
         {
             var articleField = await _context.ArticleField.FindAsync(id);
 
@@ -49,21 +49,40 @@ namespace REST_API.Controllers
                 return NotFound();
             }
 
-            return articleField;
+            return Ok(new FieldDTO
+            {
+                ID = articleField.FieldsID,
+                Name = articleField.Name,
+                Value = articleField.Value
+            });
         }
 
-        // PUT: api/ArticleFields/5
+        // PUT: api/ArticleFields
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutArticleField(int id, ArticleField articleField)
+        [HttpPut]
+        public async Task<IActionResult> PutArticleField(ArticleFieldEditTemplateDTO ArticleField)
         {
-            if (id != articleField.FieldsID)
+            var TargetField = await _context.ArticleField.FindAsync(ArticleField.FieldsID);
+
+            if(TargetField == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(articleField).State = EntityState.Modified;
+            // Grab the article and author associated with the field.
+            var OriginalArticle = await _context.Article.FindAsync(TargetField.ArticleID);
+            var OriginalUser = await _context.User.FindAsync(OriginalArticle.UserID);
+
+            // Ensure that only the article author is allowed to edit their fields.
+            if(OriginalUser.UserName != ArticleField.UserName || OriginalUser.PassWord != ArticleField.PassWord)
+            {
+                return StatusCode(403);
+            }
+
+            TargetField.Name = ArticleField.Name;
+            TargetField.Value = ArticleField.Value;
+            _context.Entry(TargetField).State = EntityState.Modified;
 
             try
             {
@@ -71,7 +90,7 @@ namespace REST_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ArticleFieldExists(id))
+                if (!ArticleFieldExists(ArticleField.FieldsID))
                 {
                     return NotFound();
                 }
@@ -88,12 +107,34 @@ namespace REST_API.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<ArticleField>> PostArticleField(ArticleField articleField)
+        public async Task<ActionResult<ArticleField>> PostArticleField(ArticleFieldCreateTemplateDTO ArticleField)
         {
-            _context.ArticleField.Add(articleField);
+            var TargetArticle = await _context.Article.FindAsync(ArticleField.ArticleID);
+
+            if(TargetArticle == null)
+            {
+                return BadRequest("The article itself does not exist.");
+            }
+
+            var ArticleAuthor = await _context.User.Where(p => p.UserName == ArticleField.UserName).FirstOrDefaultAsync();
+
+            // Ensure that only the article author is allowed to add fields to their articles.
+            if (ArticleAuthor.UserID != TargetArticle.UserID || ArticleAuthor.PassWord != ArticleField.PassWord)
+            {
+                return StatusCode(403);
+            }
+
+            ArticleField NewField = new ArticleField
+            {
+                ArticleID = ArticleField.ArticleID,
+                Name = ArticleField.Name,
+                Value = ArticleField.Value
+            };
+
+            _context.ArticleField.Add(NewField);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetArticleField", new { id = articleField.FieldsID }, articleField);
+            return CreatedAtAction("GetArticleField", new { id = NewField.FieldsID }, NewField);
         }
 
         // DELETE: api/ArticleFields/5

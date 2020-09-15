@@ -144,25 +144,19 @@ namespace REST_API.Controllers
         // PUT: api/Articles/5
         // Update the article contents, the fields will be modified using a seperate route. Requires authentication.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutArticle(int id, ArticleEditTemplateDTO article)
+        public async Task<IActionResult> EditArticle(int id, ArticleEditTemplateDTO article)
         {
             var TargetArticle = await _context.Article.FindAsync(id);
-            var Author = await _context.User.FindAsync(TargetArticle.UserID);
 
-            if(TargetArticle == null)
+            if (TargetArticle == null)
             {
                 return BadRequest("Article does not exist, create one instead!");
             }
 
-            // Check credentials of author that is allowed to edit this article.
-            if(article.UserName == Author.UserName)
-            {
-                if(article.PassWord != Author.PassWord)
-                {
-                    return StatusCode(403);
-                }
-            }
-            else
+            var Author = await _context.User.FindAsync(TargetArticle.UserID);
+
+            // Check credentials of author that is editing this article.
+            if(article.UserName != Author.UserName || article.PassWord != Author.PassWord)
             {
                 return StatusCode(403);
             }
@@ -196,12 +190,8 @@ namespace REST_API.Controllers
                 return StatusCode(403);
             }
 
-            if (author.UserName != article.UserName)
-            {
-                return StatusCode(401);
-            }
-
-            if (author.PassWord != article.PassWord)
+            // Ensure that the user entered the correct credentials.
+            if (author.UserName != article.UserName || author.PassWord != article.PassWord)
             {
                 return StatusCode(403);
             }
@@ -223,7 +213,7 @@ namespace REST_API.Controllers
         // DELETE: api/Articles/5
         // Delete article. Requires authentication.
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Article>> DeleteArticle(int id, BasicAuthenticateDTO authentication)
+        public async Task<IActionResult> DeleteArticle(int id, BasicAuthenticateDTO authentication)
         {
             var article = await _context.Article.FindAsync(id);
             if (article == null)
@@ -233,12 +223,8 @@ namespace REST_API.Controllers
 
             var author = await _context.User.Where(p => p.UserName == authentication.UserName).FirstAsync();
 
-            if (author.UserName != authentication.UserName)
-            {
-                return StatusCode(401);
-            }
-
-            if(author.PassWord != authentication.PassWord)
+            // Ensure that it is the author trying to delete the article.
+            if(author.UserName != authentication.UserName || author.PassWord != authentication.PassWord)
             {
                 return StatusCode(403);
             }
@@ -246,7 +232,7 @@ namespace REST_API.Controllers
             _context.Article.Remove(article);
             await _context.SaveChangesAsync();
 
-            return article;
+            return Ok("Deleted");
         }
 
         //private bool ArticleExists(int id)

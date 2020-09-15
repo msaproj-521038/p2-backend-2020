@@ -32,13 +32,34 @@ namespace REST_API.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUser()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
             return await _context.User.Select(AsUserDTO).ToListAsync();
         }
 
-        // GET: api/Users/Naruto
-        [HttpGet("{UserName}")]
+        // GET: api/Users/Verify
+        [HttpGet("Verify")]
+        public async Task<IActionResult> Login(User user)
+        {
+            var checkUser = await _context.User.Where(p => p.UserName == user.UserName).FirstOrDefaultAsync();
+
+            if(checkUser == null)
+            {
+                return NotFound();
+            }
+
+            if(checkUser.PassWord == user.PassWord)
+            {
+                return Ok("Successfully authenticated");
+            }
+            else
+            {
+                return BadRequest("Wrong Password!");
+            }
+        }
+
+        // GET: api/Users/Username/Naruto
+        [HttpGet("Username/{UserName}")]
         public async Task<ActionResult<UserDTO>> GetUser(string UserName)
         {
             var user = await _context.User.Select(AsUserDTO).Where(p => p.UserName == UserName).FirstOrDefaultAsync();
@@ -54,7 +75,7 @@ namespace REST_API.Controllers
         // PUT: api/Users/Naruto
         // Changing password feature.
         [HttpPut("{UserName}")]
-        public async Task<IActionResult> PutUser(string UserName, PasswordResetDTO PasswordReset)
+        public async Task<IActionResult> ResetPassword(string UserName, PasswordResetDTO PasswordReset)
         {
             var user = await _context.User.Where(p => p.UserName == UserName).FirstOrDefaultAsync();
             if (user == null)
@@ -85,7 +106,7 @@ namespace REST_API.Controllers
         // POST: api/Users
         // Create accounts, no 2 users can have the same usernames.
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> CreateAccount(User user)
         {
             // Enforce unique usernames.
             if (UserExists(user.UserName))
@@ -101,7 +122,7 @@ namespace REST_API.Controllers
         // DELETE: api/Users/Naruto
         // Must supply the correct password for the account to be deleted.
         [HttpDelete("{UserName}")]
-        public async Task<ActionResult<User>> DeleteUser(string UserName, string PassWord)
+        public async Task<IActionResult> DeleteUser(string UserName, string PassWord)
         {
             var user = await _context.User.Where(p => p.UserName == UserName).FirstOrDefaultAsync();
             if (user == null)
