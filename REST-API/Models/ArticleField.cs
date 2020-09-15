@@ -12,8 +12,9 @@ namespace REST_API.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("ID")]
-        public int FieldsID { get; set; }
+        public int FieldID { get; set; }
 
+        // Article has a 1 to many relationship with ArticleField.
         [Required]
         [Column("articleID")]
         public int ArticleID { get; set; }

@@ -18,7 +18,7 @@ namespace REST_API.Data
         public ArticleContext(DbContextOptions<ArticleContext> options) : base(options) { }
 
         // Use DbSet<Article> to query or read and 
-        // write information about A Article
+        // write information about an Article
         public DbSet<Article> Article { get; set; }
         public DbSet<User> User { get; set; }
         public DbSet<ArticleField> ArticleField { get; set; }
@@ -37,17 +37,6 @@ namespace REST_API.Data
                 .HasOne<Article>()
                 .WithMany()
                 .HasForeignKey(p => p.ArticleID);
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-           .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-           .AddJsonFile("appsettings.json")
-           .Build();
-
-            // Use sqlite database as it is cheaper, consider switching to MySQL or PostgreSQL for commercial production.
-            optionsBuilder.UseSqlite(configuration.GetConnectionString("ArticleContext"));
         }
     }
 }
