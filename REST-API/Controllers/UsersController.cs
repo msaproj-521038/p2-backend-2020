@@ -37,8 +37,9 @@ namespace REST_API.Controllers
             return await _context.User.Select(AsUserDTO).ToListAsync();
         }
 
-        // GET: api/Users/Verify
-        [HttpGet("Verify")]
+        // POST: api/Users/Verify
+        [HttpPost("Verify")]
+        // Not really creating an account, just a check that the user is logged in.
         public async Task<IActionResult> Login(BasicAuthenticateDTO user)
         {
             var checkUser = await _context.User.Where(p => p.UserName == user.UserName).FirstOrDefaultAsync();
