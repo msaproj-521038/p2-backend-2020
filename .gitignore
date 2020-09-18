@@ -21,6 +21,7 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+[Mm]igrations/
 x64/
 x86/
 [Aa][Rr][Mm]/
@@ -255,6 +256,9 @@ ServiceFabricBackup/
 *.mdf
 *.ldf
 *.ndf
+
+# Generated db file
+data.db 
 
 # Business Intelligence projects
 *.rdl.data
